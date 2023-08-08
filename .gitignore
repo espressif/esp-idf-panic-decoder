@@ -1,0 +1,4 @@
+esp_idf_panic_decoder.egg-info/
+.eggs
+
+__pycache__

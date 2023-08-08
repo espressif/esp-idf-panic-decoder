@@ -26,10 +26,11 @@ import logging
 import struct
 import sys
 from collections import namedtuple
+from typing import Optional  # noqa: F401
 
 # Used for type annotations only. Silence linter warnings.
-from pyparsing import (Combine, Group, Literal, OneOrMore, ParserElement,  # noqa: F401 # pylint: disable=unused-import
-                       ParseResults, Word, nums, srange)
+from pyparsing import (Combine, Group, Literal, OneOrMore,  # noqa: F401
+                       ParserElement, ParseResults, Word, nums, srange)
 
 try:
     import typing  # noqa: F401 # pylint: disable=unused-import
@@ -160,7 +161,7 @@ PANIC_OUTPUT_PARSERS = {
 
 
 class GdbServer(object):
-    def __init__(self, panic_info, target, log_file=None):  # type: (PanicInfo, str, str) -> None
+    def __init__(self, panic_info, target, log_file=None):  # type: (PanicInfo, str, Optional[str]) -> None
         self.panic_info = panic_info
         self.in_stream = sys.stdin
         self.out_stream = sys.stdout
@@ -282,7 +283,3 @@ def main():  # type: () -> None
         server.run()
     except KeyboardInterrupt:
         sys.exit(0)
-
-
-if __name__ == '__main__':
-    main()
