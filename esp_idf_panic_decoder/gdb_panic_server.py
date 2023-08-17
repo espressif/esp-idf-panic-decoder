@@ -29,7 +29,7 @@ from collections import namedtuple
 from typing import Optional  # noqa: F401
 
 # Used for type annotations only. Silence linter warnings.
-from pyparsing import (Combine, Group, Literal, OneOrMore,  # noqa: F401
+from pyparsing import (Combine, Group, Literal, OneOrMore,  # noqa: F401 # pylint: disable=unused-import
                        ParserElement, ParseResults, Word, nums, srange)
 
 try:
@@ -139,7 +139,7 @@ def parse_idf_riscv_panic_output(panic_text):  # type: (str) -> PanicInfo
     # Build a dict of register names/values
     rd = res.reg_dumps[0]
     core_id = int(rd.reg_dump_header.core_id)
-    regs = dict()
+    regs = {}
     for reg in rd.regs:
         reg_value = int(reg.value, 16)
         regs[reg.name] = reg_value
@@ -160,7 +160,7 @@ PANIC_OUTPUT_PARSERS = {
 }
 
 
-class GdbServer(object):
+class GdbServer:
     def __init__(self, panic_info, target, log_file=None):  # type: (PanicInfo, str, Optional[str]) -> None
         self.panic_info = panic_info
         self.in_stream = sys.stdin
@@ -224,7 +224,7 @@ class GdbServer(object):
         data_bytes = bytes(data.encode('ascii'))  # bytes() for Py2 compatibility
         checksum = sum(data_bytes) & 0xff
         # format and write the response
-        res = '${}#{:02x}'.format(data, checksum)
+        res = f'${data}#{checksum:02x}'
         self.logger.debug('Wrote: %s', res)
         self.out_stream.write(res)
         self.out_stream.flush()
@@ -232,7 +232,7 @@ class GdbServer(object):
         ret = self.in_stream.read(1)
         self.logger.debug('Response: %s', ret)
         if ret != '+':
-            sys.stderr.write("GDB responded with '-' to {}".format(res))
+            sys.stderr.write(f"GDB responded with '-' to {res}")
             raise SystemExit(1)
 
     def _respond_regs(self):  # type: () -> None
@@ -261,7 +261,7 @@ class GdbServer(object):
             if not in_stack(addr):
                 result += '00'
             else:
-                result += '{:02x}'.format(stack_data[addr - stack_addr_min])
+                result += f'{stack_data[addr - stack_addr_min]:02x}'
 
         self._respond(result)
 
