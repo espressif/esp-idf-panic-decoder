@@ -13,7 +13,7 @@ requires-python = ">=3.7"
 keywords = ["python", "espressif", "gdb", "panic-decoder"]
 license = {file = "LICENSE"}
 classifiers = [
-    'Development Status :: 4 - Beta',
+    'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Natural Language :: English',
     'Environment :: Console',
@@ -24,11 +24,13 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Operating System :: POSIX',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: MacOS :: MacOS X',
 ]
 dynamic = ['version']
+dependencies = ["pyelftools"]
 
 [project.urls]
 Homepage = "https://github.com/espressif/esp-idf-panic-decoder"
@@ -65,7 +67,7 @@ version = {attr = "esp_idf_panic_decoder.__version__"}
         ]
 
     [tool.pylint.'FORMAT']
-        max-line-length = 160
+        max-line-length = 120
 
 [tool.ruff]
     line-length    = 120
