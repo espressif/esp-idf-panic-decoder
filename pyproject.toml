@@ -36,13 +36,41 @@ dependencies = ["pyelftools"]
 Homepage = "https://github.com/espressif/esp-idf-panic-decoder"
 
 [project.optional-dependencies]
-dev = ["pre-commit"]
+dev = [
+    "pre-commit",
+    "commitizen",
+]
 
 [tool.setuptools]
 packages = ["esp_idf_panic_decoder"]
 
 [tool.setuptools.dynamic]
 version = {attr = "esp_idf_panic_decoder.__version__"}
+
+[tool.commitizen]
+version = "1.0.1"
+update_changelog_on_bump = true
+tag_format = "v$version"
+changelog_merge_prerelease = true
+annotated_tag = true
+changelog_start_rev = "v0.2.0"
+bump_message = "change: Update version to $new_version"
+version_files = [
+    "esp_idf_panic_decoder/__init__.py:__version__"
+]
+change_type_order = [
+    "BREAKING CHANGE",
+    "New Features",
+    "Bug Fixes",
+    "Code Refactoring",
+    "Performance Improvements"
+]
+
+[tool.commitizen.change_type_map]
+feat = "New Features"
+fix = "Bug Fixes"
+refactor = "Code Refactoring"
+perf = "Performance Improvements"
 
 [tool.pylint]
     [tool.pylint.'BASIC']
