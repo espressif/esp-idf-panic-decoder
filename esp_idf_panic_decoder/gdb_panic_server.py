@@ -63,6 +63,7 @@ GDB_REGS_INFO = {
     'esp32c6': GDB_REGS_INFO_RISCV_ILP32,
     'esp32h2': GDB_REGS_INFO_RISCV_ILP32,
     'esp32p4': GDB_REGS_INFO_RISCV_ILP32,
+    'esp32c5': GDB_REGS_INFO_RISCV_ILP32,
 }
 
 PanicInfo = namedtuple('PanicInfo', 'core_id regs stack_base_addr stack_data')
@@ -159,6 +160,7 @@ PANIC_OUTPUT_PARSERS = {
     'esp32c6': parse_idf_riscv_panic_output,
     'esp32h2': parse_idf_riscv_panic_output,
     'esp32p4': parse_idf_riscv_panic_output,
+    'esp32c5': parse_idf_riscv_panic_output,
 }
 
 
