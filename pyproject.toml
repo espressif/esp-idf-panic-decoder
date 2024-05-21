@@ -48,7 +48,7 @@ packages = ["esp_idf_panic_decoder"]
 version = {attr = "esp_idf_panic_decoder.__version__"}
 
 [tool.commitizen]
-version = "1.0.1"
+version = "1.1.0"
 update_changelog_on_bump = true
 tag_format = "v$version"
 changelog_merge_prerelease = true
