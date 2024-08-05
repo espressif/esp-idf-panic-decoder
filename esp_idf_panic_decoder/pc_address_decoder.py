@@ -61,4 +61,7 @@ class PcAddressDecoder:
                 return decoded if not is_rom else decoded.replace('at ??:?', 'in ROM')
         except OSError as err:
             red_print(f'{" ".join(cmd)}: {err}')
+        except subprocess.CalledProcessError as err:
+            red_print(f'{" ".join(cmd)}: {err}')
+            red_print('ELF file is missing or has changed, the build folder was probably modified.')
         return None
