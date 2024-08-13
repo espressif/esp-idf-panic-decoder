@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Optional
+from typing import List, Optional, Union
 import re
 import subprocess
 
@@ -17,12 +17,14 @@ class PcAddressDecoder:
     Class for decoding possible addresses
     """
 
-    def __init__(self, toolchain_prefix: str, elf_file: str, rom_elf_file: Optional[str] = None) -> None:
+    def __init__(
+            self, toolchain_prefix: str, elf_file: Union[List[str], str], rom_elf_file: Optional[str] = None
+        ) -> None:
         self.toolchain_prefix = toolchain_prefix
-        self.elf_file = elf_file
+        self.elf_files = elf_file if isinstance(elf_file, list) else [elf_file]
         self.rom_elf_file = rom_elf_file
         self.pc_address_buffer = b''
-        self.pc_address_matcher = PcAddressMatcher(elf_file)
+        self.pc_address_matcher = [PcAddressMatcher(file) for file in elf_file]
         if rom_elf_file is not None:
             self.rom_pc_address_matcher = PcAddressMatcher(rom_elf_file)
 
@@ -36,22 +38,25 @@ class PcAddressDecoder:
             address_int = int(num, 16)
             translation = None
 
-            # Try looking for the address in the app ELF file
-            if self.pc_address_matcher.is_executable_address(address_int):
-                translation = self.lookup_pc_address(num)
+            # Try looking for the address in the app ELF files
+            for matcher in self.pc_address_matcher:
+                if matcher.is_executable_address(address_int):
+                    translation = self.lookup_pc_address(num, elf_file=matcher.elf_path)
+                    if translation is not None:
+                        break
             # Not found in app ELF file, check ROM ELF file (if it is available)
             if translation is None and self.rom_elf_file is not None and \
             self.rom_pc_address_matcher.is_executable_address(address_int):
-                translation = self.lookup_pc_address(num, is_rom=True)
+                translation = self.lookup_pc_address(num, is_rom=True, elf_file=self.rom_elf_file)
 
             # Translation found either in the app or ROM ELF file
             if translation is not None:
                 out += translation
         return out
 
-    def lookup_pc_address(self, pc_addr: str, is_rom: bool = False) -> Optional[str]:
+    def lookup_pc_address(self, pc_addr: str, is_rom: bool = False, elf_file: str = '') -> Optional[str]:
         """Decode address using addr2line tool"""
-        elf_file: str = self.rom_elf_file if is_rom else self.elf_file  # type: ignore
+        elf_file: str = elf_file if elf_file else self.rom_elf_file if is_rom else self.elf_files[0]  # type: ignore
         cmd = [f'{self.toolchain_prefix}addr2line', '-pfiaC', '-e', elf_file, pc_addr]
 
         try:

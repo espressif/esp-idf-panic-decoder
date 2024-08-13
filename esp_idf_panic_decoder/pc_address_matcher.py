@@ -16,6 +16,7 @@ class PcAddressMatcher:
 
     def __init__(self, elf_path):  # type: (str) -> None
         self.intervals = []
+        self.elf_path = elf_path
         try:
             with open(elf_path, 'rb') as file:
                 # Is this an ELF file?
