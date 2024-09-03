@@ -24,7 +24,7 @@ class PcAddressDecoder:
         self.elf_files = elf_file if isinstance(elf_file, list) else [elf_file]
         self.rom_elf_file = rom_elf_file
         self.pc_address_buffer = b''
-        self.pc_address_matcher = [PcAddressMatcher(file) for file in elf_file]
+        self.pc_address_matcher = [PcAddressMatcher(file) for file in self.elf_files]
         if rom_elf_file is not None:
             self.rom_pc_address_matcher = PcAddressMatcher(rom_elf_file)
 
