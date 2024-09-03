@@ -1,3 +1,13 @@
+## v1.2.0 (2024-09-02)
+
+### New Features
+
+- Add support for multiple ELF files
+
+### Bug Fixes
+
+- Catch exception when the ELF file is modified
+
 ## v1.1.0 (2024-05-21)
 
 ### New Features
