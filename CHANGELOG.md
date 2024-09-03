@@ -1,3 +1,9 @@
+## v1.2.1 (2024-09-03)
+
+### Bug Fixes
+
+- PcAddressMatcher for single elf file
+
 ## v1.2.0 (2024-09-02)
 
 ### New Features
