@@ -1,3 +1,9 @@
+## v1.3.0 (2025-03-07)
+
+### New Features
+
+- Add support for esp32h21 and esp32h4 targets
+
 ## v1.2.1 (2024-09-03)
 
 ### Bug Fixes
