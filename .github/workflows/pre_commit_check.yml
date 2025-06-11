@@ -9,23 +9,22 @@ permissions:
 
 jobs:
   pre_commit_check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Fetch head and base refs
         # This is necessary for pre-commit to check the changes in the PR branch
         run: |
           git fetch origin ${{ github.base_ref }}:base_ref
           git fetch origin pull/${{ github.event.pull_request.number }}/head:pr_ref
       - name: Set up Python environment
-        uses: actions/setup-python@master
+        uses: actions/setup-python@v5
         with:
           python-version: v3.7
       - name: Install python packages
         run: |
           pip install pre-commit
-          pre-commit install-hooks
       - name: Run pre-commit and check for any changes
         run: |
           echo "Commits being checked:"
