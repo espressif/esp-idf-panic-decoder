@@ -25,6 +25,7 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Operating System :: POSIX',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: MacOS :: MacOS X',
@@ -38,7 +39,7 @@ Homepage = "https://github.com/espressif/esp-idf-panic-decoder"
 [project.optional-dependencies]
 dev = [
     "pre-commit",
-    "commitizen",
+    "czespressif",
 ]
 
 [tool.setuptools]
@@ -48,6 +49,7 @@ packages = ["esp_idf_panic_decoder"]
 version = {attr = "esp_idf_panic_decoder.__version__"}
 
 [tool.commitizen]
+name = "czespressif"
 version = "1.3.0"
 update_changelog_on_bump = true
 tag_format = "v$version"
@@ -58,19 +60,6 @@ bump_message = "change: Update version to $new_version"
 version_files = [
     "esp_idf_panic_decoder/__init__.py:__version__"
 ]
-change_type_order = [
-    "BREAKING CHANGE",
-    "New Features",
-    "Bug Fixes",
-    "Code Refactoring",
-    "Performance Improvements"
-]
-
-[tool.commitizen.change_type_map]
-feat = "New Features"
-fix = "Bug Fixes"
-refactor = "Code Refactoring"
-perf = "Performance Improvements"
 
 [tool.pylint]
     [tool.pylint.'BASIC']
