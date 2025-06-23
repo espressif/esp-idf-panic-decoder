@@ -20,6 +20,13 @@
 </div>
 <hr>
 
+## v1.4.0 (2025-06-23)
+
+### ✨ New Features
+
+- Batch requests and extract fn/paths from addr2line *(Nebojsa Cvetkovic - 29d0f91)*
+
+
 ## v1.3.0 (2025-03-07)
 
 ### ✨ New Features
