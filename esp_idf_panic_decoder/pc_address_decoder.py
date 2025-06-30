@@ -98,6 +98,9 @@ class PcAddressDecoder:
         if not addresses:
             return []
 
+        # Convert addresses to lowercase to match the case of the addresses in the ELF files
+        addresses = [addr.lower() for addr in addresses]
+
         # Addresses left to find (initially a copy of addresses: 0x40376121, 0x3fcb5590, etc.)
         remaining = addresses.copy()
 
