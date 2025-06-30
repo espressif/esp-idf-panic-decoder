@@ -20,6 +20,13 @@
 </div>
 <hr>
 
+## v1.4.1 (2025-06-30)
+
+### 🐛 Bug Fixes
+
+- Decode addresses in a case-insensitive manner *(Peter Dragun - 36a2c6d)*
+
+
 ## v1.4.0 (2025-06-23)
 
 ### ✨ New Features
