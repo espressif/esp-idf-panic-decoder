@@ -22,6 +22,8 @@ class PanicOutputDecoder:
         panic_output_file = None
         additional_symb = []
         for elf_file in self.elf_files[1:]:
+            if os.name == 'nt':
+                elf_file = elf_file.replace('\\', '\\\\')
             additional_symb.extend(['-ex', f'add-symbol-file {elf_file}'])
         try:
             # On Windows, the temporary file can't be read unless it is closed.
@@ -31,9 +33,14 @@ class PanicOutputDecoder:
                 panic_output_file.flush()
             cmd = [self.toolchain_prefix + 'gdb', '--batch', '-n', self.elf_files[0]]
             cmd.extend(additional_symb)
+            python_exe = sys.executable
+            panic_output_file_name = panic_output_file.name
+            if os.name == 'nt':
+                python_exe = python_exe.replace('\\', '\\\\')
+                panic_output_file_name = panic_output_file_name.replace('\\', '\\\\')
             cmd.extend([
-                '-ex', f'target remote | "{sys.executable}" -m esp_idf_panic_decoder '
-                f'--target {self.target} "{panic_output_file.name}"', '-ex', 'bt'
+                '-ex', f'target remote | "{python_exe}" -m esp_idf_panic_decoder '
+                f'--target {self.target} "{panic_output_file_name}"', '-ex', 'bt'
             ])
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             return output
