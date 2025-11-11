@@ -20,6 +20,13 @@
 </div>
 <hr>
 
+## v1.4.2 (2025-11-11)
+
+### 🐛 Bug Fixes
+
+- Corrected paths on Windows for the GDB *(Jakub Kocka - 49c7eb8)*
+
+
 ## v1.4.1 (2025-06-30)
 
 ### 🐛 Bug Fixes
