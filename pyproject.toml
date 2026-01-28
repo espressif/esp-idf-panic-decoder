@@ -31,7 +31,10 @@ classifiers = [
     'Operating System :: MacOS :: MacOS X',
 ]
 dynamic = ['version']
-dependencies = ["pyelftools"]
+dependencies = [
+    "pyelftools",
+    "pyparsing",
+]
 
 [project.urls]
 Homepage = "https://github.com/espressif/esp-idf-panic-decoder"
