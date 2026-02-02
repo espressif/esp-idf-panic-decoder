@@ -58,15 +58,7 @@ GDB_REGS_INFO_RISCV_ILP32 = [
 
 
 GDB_REGS_INFO = {
-    'esp32c3': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32c2': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32c6': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32h2': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32p4': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32c5': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32c61': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32h21': GDB_REGS_INFO_RISCV_ILP32,
-    'esp32h4': GDB_REGS_INFO_RISCV_ILP32,
+    'default': GDB_REGS_INFO_RISCV_ILP32,
 }
 
 PanicInfo = namedtuple('PanicInfo', 'core_id regs stack_base_addr stack_data')
@@ -158,24 +150,18 @@ def parse_idf_riscv_panic_output(panic_text):  # type: (str) -> PanicInfo
 
 
 PANIC_OUTPUT_PARSERS = {
-    'esp32c3': parse_idf_riscv_panic_output,
-    'esp32c2': parse_idf_riscv_panic_output,
-    'esp32c6': parse_idf_riscv_panic_output,
-    'esp32h2': parse_idf_riscv_panic_output,
-    'esp32p4': parse_idf_riscv_panic_output,
-    'esp32c5': parse_idf_riscv_panic_output,
-    'esp32c61': parse_idf_riscv_panic_output,
-    'esp32h21': parse_idf_riscv_panic_output,
-    'esp32h4': parse_idf_riscv_panic_output,
+    'default': parse_idf_riscv_panic_output,
 }
 
 
 class GdbServer:
-    def __init__(self, panic_info, target, log_file=None):  # type: (PanicInfo, str, Optional[str]) -> None
+    def __init__(self, panic_info, target='default', log_file=None):
+        # type: (PanicInfo, str, Optional[str]) -> None
+        # target is deprecated and only kept for backwards compatibility
         self.panic_info = panic_info
         self.in_stream = sys.stdin
         self.out_stream = sys.stdout
-        self.reg_list = GDB_REGS_INFO[target]
+        self.reg_list = GDB_REGS_INFO.get(target, GDB_REGS_INFO['default'])
 
         self.logger = logging.getLogger('GdbServer')
         if log_file:
@@ -280,13 +266,14 @@ def main():  # type: () -> None
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=argparse.FileType('r'),
                         help='File containing the panic handler output')
-    parser.add_argument('--target', choices=GDB_REGS_INFO.keys(),
-                        help='Chip to use (determines the architecture)')
+    parser.add_argument('--target', type=str, default='default',
+                        help='[DEPRECATED] Chip to use. '
+                        'This argument is not longer used as all chips are using the same register set.')
     parser.add_argument('--gdb-log', default=None,
                         help='If specified, the file for logging GDB server debug information')
     args = parser.parse_args()
 
-    panic_info = PANIC_OUTPUT_PARSERS[args.target](args.input_file.read())
+    panic_info = PANIC_OUTPUT_PARSERS.get(args.target, PANIC_OUTPUT_PARSERS['default'])(args.input_file.read())
 
     server = GdbServer(panic_info, target=args.target, log_file=args.gdb_log)
     try:
