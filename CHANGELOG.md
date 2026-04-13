@@ -20,6 +20,17 @@
 </div>
 <hr>
 
+## v1.5.0 (2026-04-10)
+
+### ✨ New Features
+
+- Removed target mapping and use generic register set *(Peter Dragun - b9e995d)*
+
+### 🐛 Bug Fixes
+
+- Add pyparsing to dependencies *(Peter Dragun - af2e9cb)*
+
+
 ## v1.4.2 (2025-11-11)
 
 ### 🐛 Bug Fixes
