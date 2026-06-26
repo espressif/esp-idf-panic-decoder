@@ -32,8 +32,10 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
+    "esp-pylib[cli,ide]>=1.1.1",
     "pyelftools",
     "pyparsing",
+    "rich-click",
 ]
 
 [project.urls]

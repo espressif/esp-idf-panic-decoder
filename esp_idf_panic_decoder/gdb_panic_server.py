@@ -20,22 +20,29 @@
 #
 
 
-import argparse
 import binascii
 import logging
 import struct
 import sys
 from collections import namedtuple
-from typing import Optional  # noqa: F401
+import typing as t  # noqa: F401
 
-# Used for type annotations only. Silence linter warnings.
-from pyparsing import (Combine, Group, Literal, OneOrMore,  # noqa: F401 # pylint: disable=unused-import
-                       ParserElement, ParseResults, Word, nums, srange)
+import rich_click as click
+from esp_pylib.excepthook import install_exception_reporting
+from esp_pylib.logger import log
 
-try:
-    import typing  # noqa: F401 # pylint: disable=unused-import
-except ImportError:
-    pass
+from pyparsing import (
+    Combine,
+    Group,
+    Literal,
+    OneOrMore,
+    ParserElement, # noqa: F401
+    ParseResults, # noqa: F401
+    Word,
+    nums,
+    srange,
+)
+
 
 # pyparsing helper
 hexnumber = srange('[0-9a-f]')
@@ -64,16 +71,14 @@ GDB_REGS_INFO = {
 PanicInfo = namedtuple('PanicInfo', 'core_id regs stack_base_addr stack_data')
 
 
-def build_riscv_panic_output_parser():  # type: () -> typing.Any[typing.Type[ParserElement]]
+def build_riscv_panic_output_parser():  # type: () -> t.Any[t.Type[ParserElement]]
     """Builds a parser for the panic handler output using pyparsing"""
 
     # We don't match the first line, since "Guru Meditation" will not be printed in case of an abort:
     # Guru Meditation Error: Core  0 panic'ed (Store access fault). Exception was unhandled.
 
     # Core  0 register dump:
-    reg_dump_header = Group(Literal('Core') +
-                            Word(nums)('core_id') +
-                            Literal('register dump:'))('reg_dump_header')
+    reg_dump_header = Group(Literal('Core') + Word(nums)('core_id') + Literal('register dump:'))('reg_dump_header')
 
     # MEPC    : 0x4200232c  RA      : 0x42009694  SP      : 0x3fc93a80  GP      : 0x3fc8b320
     reg_name = Word(srange('[A-Z_0-9/-]'))('name')
@@ -86,18 +91,16 @@ def build_riscv_panic_output_parser():  # type: () -> typing.Any[typing.Type[Par
 
     # Stack memory:
     # 3fc93a80: 0x00000030 0x00000021 0x3fc8aedc 0x4200232a 0xa5a5a5a5 0xa5a5a5a5 0x3fc8aedc 0x420099b0
-    stack_line = Group(Word(hexnumber)('base') + Literal(':') +
-                       Group(OneOrMore(hexnumber_with_0x))('data'))
-    stack_dump = Group(Literal('Stack memory:') +
-                       Group(OneOrMore(stack_line))('lines'))('stack_dump')
+    stack_line = Group(Word(hexnumber)('base') + Literal(':') + Group(OneOrMore(hexnumber_with_0x))('data'))
+    stack_dump = Group(Literal('Stack memory:') + Group(OneOrMore(stack_line))('lines'))('stack_dump')
 
     # Parser for the complete panic output:
     panic_output = reg_dumps + stack_dump
     return panic_output
 
 
-def get_stack_addr_and_data(res):  # type: (ParseResults) -> typing.Tuple[int, bytes]
-    """ Extract base address and bytes from the parsed stack dump """
+def get_stack_addr_and_data(res):  # type: (ParseResults) -> t.Tuple[int, bytes]
+    """Extract base address and bytes from the parsed stack dump"""
     stack_base_addr = 0  # First reported address in the dump
     base_addr = 0  # keeps track of the address for the given line of the dump
     bytes_in_line = 0  # bytes of stack parsed on the previous line; used to validate the next base address
@@ -123,7 +126,7 @@ def get_stack_addr_and_data(res):  # type: (ParseResults) -> typing.Tuple[int, b
 
 
 def parse_idf_riscv_panic_output(panic_text):  # type: (str) -> PanicInfo
-    """ Decode panic handler output from a file """
+    """Decode panic handler output from a file"""
     panic_output = build_riscv_panic_output_parser()
     results = panic_output.searchString(panic_text)
     if len(results) != 1:
@@ -143,10 +146,7 @@ def parse_idf_riscv_panic_output(panic_text):  # type: (str) -> PanicInfo
 
     stack_base_addr, stack_data = get_stack_addr_and_data(res)
 
-    return PanicInfo(core_id=core_id,
-                     regs=regs,
-                     stack_base_addr=stack_base_addr,
-                     stack_data=stack_data)
+    return PanicInfo(core_id=core_id, regs=regs, stack_base_addr=stack_base_addr, stack_data=stack_data)
 
 
 PANIC_OUTPUT_PARSERS = {
@@ -156,7 +156,7 @@ PANIC_OUTPUT_PARSERS = {
 
 class GdbServer:
     def __init__(self, panic_info, target='default', log_file=None):
-        # type: (PanicInfo, str, Optional[str]) -> None
+        # type: (PanicInfo, str, t.Optional[str]) -> None
         # target is deprecated and only kept for backwards compatibility
         self.panic_info = panic_info
         self.in_stream = sys.stdin
@@ -172,7 +172,7 @@ class GdbServer:
             self.logger.addHandler(handler)
 
     def run(self):  # type: () -> None
-        """ Process GDB commands from stdin until GDB tells us to quit """
+        """Process GDB commands from stdin until GDB tells us to quit"""
         buffer = ''
         while True:
             buffer += self.in_stream.read(1)
@@ -218,7 +218,7 @@ class GdbServer:
     def _respond(self, data):  # type: (str) -> None
         # calculate checksum
         data_bytes = bytes(data.encode('ascii'))  # bytes() for Py2 compatibility
-        checksum = sum(data_bytes) & 0xff
+        checksum = sum(data_bytes) & 0xFF
         # format and write the response
         res = f'${data}#{checksum:02x}'
         self.logger.debug('Wrote: %s', res)
@@ -228,8 +228,7 @@ class GdbServer:
         ret = self.in_stream.read(1)
         self.logger.debug('Response: %s', ret)
         if ret != '+':
-            sys.stderr.write(f"GDB responded with '-' to {res}")
-            raise SystemExit(1)
+            log.die(f"GDB responded with '-' to {res}")
 
     def _respond_regs(self):  # type: () -> None
         response = ''
@@ -249,7 +248,7 @@ class GdbServer:
 
         # For any memory address that is not on the stack, pretend the value is 0x00.
         # GDB should never ask us for program memory, it will be obtained from the ELF file.
-        def in_stack(addr):  # type: (int) -> typing.Any[bool]
+        def in_stack(addr):  # type: (int) -> t.Any[bool]
             return stack_addr_min <= addr < stack_addr_max
 
         result = ''
@@ -262,20 +261,29 @@ class GdbServer:
         self._respond(result)
 
 
-def main():  # type: () -> None
-    parser = argparse.ArgumentParser()
-    parser.add_argument('input_file', type=argparse.FileType('r'),
-                        help='File containing the panic handler output')
-    parser.add_argument('--target', type=str, default='default',
-                        help='[DEPRECATED] Chip to use. '
-                        'This argument is not longer used as all chips are using the same register set.')
-    parser.add_argument('--gdb-log', default=None,
-                        help='If specified, the file for logging GDB server debug information')
-    args = parser.parse_args()
+@click.command(context_settings={'help_option_names': ['-h', '--help']})
+@click.argument('input_file', type=click.File('r'))
+@click.option(
+    '--target',
+    default='default',
+    help='[DEPRECATED] Chip to use. This argument is no longer used as all chips are using the same register set.',
+)
+@click.option(
+    '--gdb-log',
+    default=None,
+    help='If specified, the file for logging GDB server debug information',
+)
+def main(input_file, target, gdb_log):
+    """Parse ESP-IDF panic handler output and act as a GDB remote server."""
+    _run(input_file, target, gdb_log)
 
-    panic_info = PANIC_OUTPUT_PARSERS.get(args.target, PANIC_OUTPUT_PARSERS['default'])(args.input_file.read())
 
-    server = GdbServer(panic_info, target=args.target, log_file=args.gdb_log)
+def _run(input_file, target, gdb_log):
+    install_exception_reporting()
+
+    panic_info = PANIC_OUTPUT_PARSERS.get(target, PANIC_OUTPUT_PARSERS['default'])(input_file.read())
+
+    server = GdbServer(panic_info, target=target, log_file=gdb_log)
     try:
         server.run()
     except KeyboardInterrupt:
