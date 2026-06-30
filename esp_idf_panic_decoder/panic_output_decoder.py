@@ -6,7 +6,9 @@ import subprocess
 import sys
 import tempfile
 from typing import List, Union
-from .output_helpers import red_print
+
+from esp_pylib.logger import log
+from rich.markup import escape
 
 
 class PanicOutputDecoder:
@@ -38,10 +40,15 @@ class PanicOutputDecoder:
             if os.name == 'nt':
                 python_exe = python_exe.replace('\\', '\\\\')
                 panic_output_file_name = panic_output_file_name.replace('\\', '\\\\')
-            cmd.extend([
-                '-ex', f'target remote | "{python_exe}" -m esp_idf_panic_decoder '
-                f'--target {self.target} "{panic_output_file_name}"', '-ex', 'bt'
-            ])
+            cmd.extend(
+                [
+                    '-ex',
+                    f'target remote | "{python_exe}" -m esp_idf_panic_decoder '
+                    f'--target {self.target} "{panic_output_file_name}"',
+                    '-ex',
+                    'bt',
+                ]
+            )
             output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             return output
         finally:
@@ -49,4 +56,4 @@ class PanicOutputDecoder:
                 try:
                     os.unlink(panic_output_file.name)
                 except OSError as err:
-                    red_print(f"Couldn't remove temporary panic output file ({err})")
+                    log.err(f"Couldn't remove temporary panic output file ({escape(str(err))})")

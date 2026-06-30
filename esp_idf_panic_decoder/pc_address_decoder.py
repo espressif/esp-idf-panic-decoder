@@ -5,8 +5,10 @@ from typing import List, Optional, Union, Dict, Tuple
 import re
 import subprocess
 
+from esp_pylib.logger import log
+from rich.markup import escape
+
 from .pc_address_matcher import PcAddressMatcher
-from .output_helpers import red_print
 
 # regex matches an potential address
 ADDRESS_RE = re.compile(r'0x[0-9a-f]{8}', re.IGNORECASE)
@@ -16,6 +18,7 @@ ADDR2LINE_ADDRESS_LOOKAHEAD_RE = re.compile(r'(?=0x[0-9a-f]{8}\r?\n)')
 # regex matches filename and line number in addr2line output (and ignores discriminators)
 ADDR2LINE_FILE_LINE_RE = re.compile(r'(?P<file>.*):(?P<line>\d+|\?)(?: \(discriminator \d+\))?$')
 
+
 # Decoded PC address trace
 @dataclass
 class PcAddressLocation:
@@ -23,14 +26,15 @@ class PcAddressLocation:
     path: str
     line: str
 
+
 class PcAddressDecoder:
     """
     Class for decoding possible addresses
     """
 
     def __init__(
-            self, toolchain_prefix: str, elf_file: Union[List[str], str], rom_elf_file: Optional[str] = None
-        ) -> None:
+        self, toolchain_prefix: str, elf_file: Union[List[str], str], rom_elf_file: Optional[str] = None
+    ) -> None:
         self.toolchain_prefix = toolchain_prefix
         self.elf_files = elf_file if isinstance(elf_file, list) else [elf_file]
         self.rom_elf_file = rom_elf_file
@@ -153,11 +157,11 @@ class PcAddressDecoder:
         try:
             batch_output = subprocess.check_output(cmd, cwd='.')
         except OSError as err:
-            red_print(f'{" ".join(cmd)}: {err}')
+            log.err(f"{escape(' '.join(cmd))}: {escape(str(err))}")
             return {}
         except subprocess.CalledProcessError as err:
-            red_print(f'{" ".join(cmd)}: {err}')
-            red_print('ELF file is missing or has changed, the build folder was probably modified.')
+            log.err(f"{escape(' '.join(cmd))}: {escape(str(err))}")
+            log.err('ELF file is missing or has changed, the build folder was probably modified.')
             return {}
 
         decoded_output = batch_output.decode(errors='ignore')
@@ -192,7 +196,7 @@ class PcAddressDecoder:
 
         result: Dict[str, List[PcAddressLocation]] = {}
         for section in sections:
-            section = section.strip() # Remove trailing newline
+            section = section.strip()  # Remove trailing newline
             if not section:
                 continue
 
