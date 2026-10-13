@@ -11,14 +11,12 @@ description = "ESP-IDF panic decoder"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.7"
 keywords = ["python", "espressif", "gdb", "panic-decoder"]
-license = {file = "LICENSE"}
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Natural Language :: English',
     'Environment :: Console',
     'Topic :: Software Development :: Embedded Systems',
-    'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
@@ -30,7 +28,7 @@ classifiers = [
     'Operating System :: Microsoft :: Windows',
     'Operating System :: MacOS :: MacOS X',
 ]
-dynamic = ['version']
+dynamic = ['version', 'license']
 dependencies = [
     "esp-pylib[cli,ide]>=1.1.1",
     "pyelftools",
