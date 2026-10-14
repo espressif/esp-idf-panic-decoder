@@ -20,7 +20,7 @@ workflow:
 # TEMPLATES
 # ------------------------------------------------------------------------------------------------------
 .base_template:
-  image: python:3.7-bullseye
+  image: python:3.7-bookworm
   tags:
     - build
     - internet
@@ -36,7 +36,6 @@ pre-commit_hooks_MR:
   extends: .base_template
   stage: codecheck
   script:
-    - apt-get update && apt-get install -y -q git
     - echo "Merge request is from ${CI_COMMIT_REF_NAME} into ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}"
     - git fetch origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} ${CI_COMMIT_REF_NAME}
     - export from_sha=$(git merge-base HEAD origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME})
